@@ -7,6 +7,8 @@
 				android:label="MuPDF mini"
 				android:configChanges="orientation|screenSize|keyboardHidden"
 				android:hardwareAccelerated="false"
+				android:launchMode="standard"
+				android:documentLaunchMode="intoExisting"
 				>
 			<intent-filter>
 				<action android:name="android.intent.action.VIEW" />
