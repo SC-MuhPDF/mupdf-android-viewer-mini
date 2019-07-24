@@ -8,7 +8,7 @@
 		/>
 	<application
 		android:label="MuPDF mini"
-		android:icon="@drawable/ic_mupdf"
+		android:icon="@mipmap/ic_launcher"
 		>
 		<activity
 			android:name=".LibraryActivity"
