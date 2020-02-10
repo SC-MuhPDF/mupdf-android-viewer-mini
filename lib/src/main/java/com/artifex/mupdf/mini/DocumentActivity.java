@@ -36,8 +36,7 @@ import java.io.InputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class DocumentActivity extends Activity
-{
+public class DocumentActivity extends Activity {
 	private final String APP = "MuPDF";
 
 	public final int NAVIGATE_REQUEST = 1;
@@ -127,7 +126,7 @@ public class DocumentActivity extends Activity
 			}
 		}
 
-		titleLabel = (TextView)findViewById(R.id.title_label);
+		titleLabel = (TextView) findViewById(R.id.title_label);
 		titleLabel.setText(title);
 
 		history = new Stack<Integer>();
@@ -142,20 +141,24 @@ public class DocumentActivity extends Activity
 		searchHitPage = -1;
 		hasLoaded = false;
 
-		pageView = (PageView)findViewById(R.id.page_view);
+		pageView = (PageView) findViewById(R.id.page_view);
 		pageView.setActionListener(this);
 
-		pageLabel = (TextView)findViewById(R.id.page_label);
-		pageSeekbar = (SeekBar)findViewById(R.id.page_seekbar);
+		pageLabel = (TextView) findViewById(R.id.page_label);
+		pageSeekbar = (SeekBar) findViewById(R.id.page_seekbar);
 		pageSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 			public int newProgress = -1;
+
 			public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser) {
 				if (fromUser) {
 					newProgress = progress;
-					pageLabel.setText((progress+1) + " / " + pageCount);
+					pageLabel.setText((progress + 1) + " / " + pageCount);
 				}
 			}
-			public void onStartTrackingTouch(SeekBar seekbar) {}
+
+			public void onStartTrackingTouch(SeekBar seekbar) {
+			}
+
 			public void onStopTrackingTouch(SeekBar seekbar) {
 				gotoPage(newProgress);
 			}
@@ -167,7 +170,7 @@ public class DocumentActivity extends Activity
 				showSearch();
 			}
 		});
-		searchText = (EditText)findViewById(R.id.search_text);
+		searchText = (EditText) findViewById(R.id.search_text);
 		searchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -182,8 +185,12 @@ public class DocumentActivity extends Activity
 			}
 		});
 		searchText.addTextChangedListener(new TextWatcher() {
-			public void afterTextChanged(Editable s) {}
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+			public void afterTextChanged(Editable s) {
+			}
+
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				resetSearch();
 			}
@@ -283,6 +290,7 @@ public class DocumentActivity extends Activity
 	protected void openDocument() {
 		worker.add(new Worker.Task() {
 			boolean needsPassword;
+
 			public void work() {
 				Log.i(APP, "open document");
 				if (path != null)
@@ -291,6 +299,7 @@ public class DocumentActivity extends Activity
 					doc = Document.openDocument(buffer, mimetype);
 				needsPassword = doc.needsPassword();
 			}
+
 			public void run() {
 				if (needsPassword)
 					askPassword(R.string.dlog_password_message);
@@ -330,10 +339,12 @@ public class DocumentActivity extends Activity
 	protected void checkPassword(final String password) {
 		worker.add(new Worker.Task() {
 			boolean passwordOkay;
+
 			public void work() {
 				Log.i(APP, "check password");
 				passwordOkay = doc.authenticatePassword(password);
 			}
+
 			public void run() {
 				if (passwordOkay)
 					loadDocument();
@@ -367,13 +378,13 @@ public class DocumentActivity extends Activity
 	}
 
 	protected void showKeyboard() {
-		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		if (imm != null)
 			imm.showSoftInput(searchText, 0);
 	}
 
 	protected void hideKeyboard() {
-		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		if (imm != null)
 			imm.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
 	}
@@ -389,6 +400,7 @@ public class DocumentActivity extends Activity
 		stopSearch = false;
 		worker.add(new Worker.Task() {
 			int searchPage = startPage;
+
 			public void work() {
 				if (stopSearch || needle != searchNeedle)
 					return;
@@ -406,9 +418,10 @@ public class DocumentActivity extends Activity
 						break;
 				}
 			}
+
 			public void run() {
 				if (stopSearch || needle != searchNeedle) {
-					pageLabel.setText((currentPage+1) + " / " + pageCount);
+					pageLabel.setText((currentPage + 1) + " / " + pageCount);
 				} else if (searchHitPage == currentPage) {
 					loadPage();
 				} else if (searchHitPage >= 0) {
@@ -417,10 +430,10 @@ public class DocumentActivity extends Activity
 					loadPage();
 				} else {
 					if (searchPage >= 0 && searchPage < pageCount) {
-						pageLabel.setText((searchPage+1) + " / " + pageCount);
+						pageLabel.setText((searchPage + 1) + " / " + pageCount);
 						worker.add(this);
 					} else {
-						pageLabel.setText((currentPage+1) + " / " + pageCount);
+						pageLabel.setText((currentPage + 1) + " / " + pageCount);
 						Log.i(APP, "search not found");
 						Toast.makeText(DocumentActivity.this, getString(R.string.toast_search_not_found), Toast.LENGTH_SHORT).show();
 					}
@@ -466,6 +479,7 @@ public class DocumentActivity extends Activity
 					throw x;
 				}
 			}
+
 			public void run() {
 				if (currentPage < 0 || currentPage >= pageCount)
 					currentPage = 0;
@@ -495,6 +509,7 @@ public class DocumentActivity extends Activity
 					throw x;
 				}
 			}
+
 			public void run() {
 				loadPage();
 				loadOutline();
@@ -512,6 +527,7 @@ public class DocumentActivity extends Activity
 						flattenOutline(node.down, indent + "    ");
 				}
 			}
+
 			public void work() {
 				Log.i(APP, "load outline");
 				Outline[] outline = doc.loadOutline();
@@ -522,6 +538,7 @@ public class DocumentActivity extends Activity
 					flatOutline = null;
 				}
 			}
+
 			public void run() {
 				if (flatOutline != null)
 					outlineButton.setVisibility(View.VISIBLE);
@@ -537,6 +554,7 @@ public class DocumentActivity extends Activity
 			public Bitmap bitmap;
 			public Link[] links;
 			public Quad[] hits;
+
 			public void work() {
 				try {
 					Log.i(APP, "load page " + pageNumber);
@@ -564,12 +582,13 @@ public class DocumentActivity extends Activity
 					Log.e(APP, x.getMessage());
 				}
 			}
+
 			public void run() {
 				if (bitmap != null)
 					pageView.setBitmap(bitmap, zoom, wentBack, links, hits);
 				else
 					pageView.setError();
-				pageLabel.setText((currentPage+1) + " / " + pageCount);
+				pageLabel.setText((currentPage + 1) + " / " + pageCount);
 				pageSeekbar.setMax(pageCount - 1);
 				pageSeekbar.setProgress(pageNumber);
 				wentBack = false;
@@ -612,14 +631,14 @@ public class DocumentActivity extends Activity
 	public void goBackward() {
 		if (currentPage > 0) {
 			wentBack = true;
-			currentPage --;
+			currentPage--;
 			loadPage();
 		}
 	}
 
 	public void goForward() {
 		if (currentPage < pageCount - 1) {
-			currentPage ++;
+			currentPage++;
 			loadPage();
 		}
 	}
@@ -642,4 +661,30 @@ public class DocumentActivity extends Activity
 			Toast.makeText(DocumentActivity.this, x.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		switch (keyCode) {
+			case KeyEvent.KEYCODE_NAVIGATE_NEXT:
+			case KeyEvent.KEYCODE_DPAD_RIGHT:
+			case KeyEvent.KEYCODE_PAGE_DOWN:
+			case KeyEvent.KEYCODE_SPACE:
+				goForward();
+				return true;
+			case KeyEvent.KEYCODE_NAVIGATE_PREVIOUS:
+			case KeyEvent.KEYCODE_DPAD_LEFT:
+			case KeyEvent.KEYCODE_PAGE_UP:
+			case KeyEvent.KEYCODE_CTRL_LEFT:
+				goBackward();
+				return true;
+			case KeyEvent.KEYCODE_MOVE_HOME:
+				gotoPage(0);
+				return true;
+			case KeyEvent.KEYCODE_MOVE_END:
+				gotoPage(pageCount - 1);
+				return true;
+		}
+		return false;
+	}
+
 }
