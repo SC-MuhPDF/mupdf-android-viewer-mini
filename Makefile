@@ -15,13 +15,13 @@ lint:
 archive: generate
 	./gradlew --warning-mode=all uploadArchives
 sync: archive
-	rsync -av MAVEN/com/ ghostscript.com:/var/www/maven.ghostscript.com/com/
+	rsync -av $(HOME)/MAVEN/com/ ghostscript.com:/var/www/maven.ghostscript.com/com/
 
 run: install
 	adb shell am start -n com.artifex.mupdf.mini.app/.LibraryActivity
 
 clean:
 	rm -rf .gradle build
-	rm -rf jni/.externalNativeBuild jni/.gradle jni/build jni/libmupdf/generated
+	rm -rf jni/.cxx jni/.externalNativeBuild jni/.gradle jni/build jni/libmupdf/generated
 	rm -rf lib/.gradle lib/build
 	rm -rf app/.gradle app/build

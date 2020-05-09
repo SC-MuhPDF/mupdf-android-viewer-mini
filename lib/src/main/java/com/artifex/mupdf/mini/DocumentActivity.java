@@ -3,12 +3,14 @@ package com.artifex.mupdf.mini;
 import com.artifex.mupdf.fitz.*;
 import com.artifex.mupdf.fitz.android.*;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,16 +32,22 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import java.util.ArrayList;
 import java.util.Stack;
 import java.io.InputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class DocumentActivity extends Activity {
 	private final String APP = "MuPDF";
 
 	public final int NAVIGATE_REQUEST = 1;
+	protected final int PERMISSION_REQUEST = 42;
 
 	protected Worker worker;
 	protected SharedPreferences prefs;
@@ -87,6 +95,13 @@ public class DocumentActivity extends Activity {
 	protected Stack<Integer> history;
 	protected boolean wentBack;
 
+	private String toHex(byte[] digest) {
+		StringBuilder builder = new StringBuilder(2 * digest.length);
+		for (byte b : digest)
+			builder.append(String.format("%02x", b));
+		return builder.toString();
+	}
+
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -107,6 +122,8 @@ public class DocumentActivity extends Activity {
 		mimetype = getIntent().getType();
 		key = uri.toString();
 		if (uri.getScheme().equals("file")) {
+			if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED)
+				ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST);
 			title = uri.getLastPathSegment();
 			path = uri.getPath();
 		} else {
@@ -120,7 +137,8 @@ public class DocumentActivity extends Activity {
 					out.write(buf, 0, n);
 				out.flush();
 				buffer = out.toByteArray();
-			} catch (IOException x) {
+				key = toHex(MessageDigest.getInstance("MD5").digest(buffer));
+			} catch (IOException | NoSuchAlgorithmException x) {
 				Log.e(APP, x.toString());
 				Toast.makeText(this, x.getMessage(), Toast.LENGTH_SHORT).show();
 			}
@@ -498,11 +516,11 @@ public class DocumentActivity extends Activity {
 		worker.add(new Worker.Task() {
 			public void work() {
 				try {
-					long mark = doc.makeBookmark(currentPage);
+					long mark = doc.makeBookmark(doc.locationFromPageNumber(currentPage));
 					Log.i(APP, "relayout document");
 					doc.layout(layoutW, layoutH, layoutEm);
 					pageCount = doc.countPages();
-					currentPage = doc.findBookmark(mark);
+					currentPage = doc.pageNumberFromLocation(doc.findBookmark(mark));
 				} catch (Throwable x) {
 					pageCount = 1;
 					currentPage = 0;
@@ -522,7 +540,10 @@ public class DocumentActivity extends Activity {
 			private void flattenOutline(Outline[] outline, String indent) {
 				for (Outline node : outline) {
 					if (node.title != null)
-						flatOutline.add(new OutlineActivity.Item(indent + node.title, node.page));
+					{
+						int outlinePage = doc.pageNumberFromLocation(doc.resolveLink(node));
+						flatOutline.add(new OutlineActivity.Item(indent + node.title, node.uri, outlinePage));
+					}
 					if (node.down != null)
 						flattenOutline(node.down, indent + "    ");
 				}
@@ -649,6 +670,10 @@ public class DocumentActivity extends Activity {
 			currentPage = p;
 			loadPage();
 		}
+	}
+
+	public void gotoPage(String uri) {
+		gotoPage(doc.pageNumberFromLocation(doc.resolveLink(uri)));
 	}
 
 	public void gotoURI(String uri) {
