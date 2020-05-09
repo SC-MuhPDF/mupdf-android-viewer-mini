@@ -7,7 +7,7 @@
 		android:name="android.permission.READ_EXTERNAL_STORAGE"
 		/>
 	<application
-		android:label="MuPDF mini"
+		android:label="MuhPDF"
 		android:icon="@mipmap/ic_launcher"
 		>
 		<activity
