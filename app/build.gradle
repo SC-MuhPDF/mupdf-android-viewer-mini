@@ -19,7 +19,7 @@ android {
 		targetSdkVersion 28
 		versionName '1.19.0'
 		versionCode 90
-		ndkVersion = "20.0.5594570"
+		ndkVersion = "21.3.6528147"
 	}
 
 	splits {
