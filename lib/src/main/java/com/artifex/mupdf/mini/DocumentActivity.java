@@ -709,7 +709,7 @@ public class DocumentActivity extends Activity {
 				gotoPage(pageCount - 1);
 				return true;
 		}
-		return false;
+		return super.onKeyDown(keyCode, event);
 	}
 
 }
