@@ -2,22 +2,24 @@
 
 default: debug
 
-generate:
-	if [ -f jni/Makefile ]; then make -C jni generate; fi
-debug: generate
+debug:
 	./gradlew --warning-mode=all assembleDebug bundleDebug
-release: generate
+release:
 	./gradlew --warning-mode=all assembleRelease bundleRelease
-install: generate
+install:
 	./gradlew --warning-mode=all installDebug
+install-release:
+	./gradlew --warning-mode=all installRelease
 lint:
 	./gradlew --warning-mode=all lint
-archive: generate
-	./gradlew --warning-mode=all uploadArchives
+archive:
+	./gradlew --warning-mode=all publishReleasePublicationToLocalRepository
 sync: archive
 	rsync -av --chmod=g+w --chown=:gs-priv $(HOME)/MAVEN/com/ ghostscript.com:/var/www/maven.ghostscript.com/com/
 
 run: install
+	adb shell am start -n com.artifex.mupdf.mini.app/.LibraryActivity
+run-release: install-release
 	adb shell am start -n com.artifex.mupdf.mini.app/.LibraryActivity
 
 tarball: release
@@ -26,6 +28,6 @@ tarball: release
 
 clean:
 	rm -rf .gradle build
-	rm -rf jni/.cxx jni/.externalNativeBuild jni/.gradle jni/build jni/libmupdf/generated
+	rm -rf jni/.cxx jni/.externalNativeBuild jni/.gradle jni/build
 	rm -rf lib/.gradle lib/build
 	rm -rf app/.gradle app/build

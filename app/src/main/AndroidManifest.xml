@@ -3,16 +3,13 @@
 	package="com.artifex.mupdf.mini.app"
 	android:installLocation="auto"
 	>
-	<uses-permission
-		android:name="android.permission.READ_EXTERNAL_STORAGE"
-		/>
 	<application
 		android:label="MuhPDF"
 		android:icon="@mipmap/ic_launcher"
 		>
 		<activity
 			android:name=".LibraryActivity"
-			android:configChanges="orientation|screenSize|keyboardHidden"
+			android:exported="true"
 			>
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />

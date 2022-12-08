@@ -1,24 +1,23 @@
 apply plugin: 'com.android.application'
 
 group = 'com.artifex.mupdf'
-version = '1.19.0'
+version = '1.20.2a'
 
 dependencies {
-	implementation 'androidx.appcompat:appcompat:1.1.+'
 	if (file('../lib/build.gradle').isFile())
 		api project(':lib')
 	else
-		api 'com.artifex.mupdf:mini:1.19.0'
+		api 'com.artifex.mupdf:mini:1.20.2a'
 }
 
 android {
-	compileSdkVersion 28
+	compileSdkVersion 31
 	defaultConfig {
 		applicationId "de.spiritcroc.mupdf"
-		minSdkVersion 16
-		targetSdkVersion 28
-		versionName '1.19.0'
-		versionCode 90
+		minSdkVersion 21
+		targetSdkVersion 31
+		versionName '1.20.2a'
+		versionCode 102
 		ndkVersion = "21.3.6528147"
 	}
 
@@ -47,6 +46,9 @@ android {
 		buildTypes {
 			release {
 				signingConfig signingConfigs.release
+				ndk {
+					debugSymbolLevel 'FULL'
+				}
 			}
 		}
 	}
